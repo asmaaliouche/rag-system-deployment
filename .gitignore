@@ -1,0 +1,32 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets — never commit these
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated data (too large / sensitive for version control)
+data/raw/
+data/processed/
+data/faiss_index/
+
+# Binary / generated assets
+*.pdf
+*.pptx
+
+# macOS
+.DS_Store
+
+# Poetry
+.poetry/
