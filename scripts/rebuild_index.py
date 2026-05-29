@@ -16,14 +16,35 @@ Usage:
 
 import os
 import pandas as pd
+from dotenv import load_dotenv
+from huggingface_hub import login
+
+# Disable XetHub to avoid 403 errors and suppress SSL warnings
+os.environ["HF_HUB_DISABLE_XET"] = "1"
+import httpx
+original_init = httpx.Client.__init__
+def patched_init(self, *args, **kwargs):
+    kwargs['verify'] = False
+    original_init(self, *args, **kwargs)
+httpx.Client.__init__ = patched_init
+# Also suppress warnings
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import warnings
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+
+load_dotenv()
+if "HF_TOKEN" in os.environ:
+    login(token=os.environ["HF_TOKEN"])
+
 # pyrefly: ignore [missing-import]
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 # pyrefly: ignore [missing-import]
 from langchain_community.embeddings import HuggingFaceEmbeddings
 # pyrefly: ignore [missing-import]
 from langchain_community.vectorstores import FAISS
 # pyrefly: ignore [missing-import]
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 

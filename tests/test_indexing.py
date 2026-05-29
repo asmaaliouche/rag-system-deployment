@@ -13,7 +13,7 @@ Tests cover:
 import pytest
 import pandas as pd
 # pyrefly: ignore [missing-import]
-from langchain.schema import Document
+from langchain_core.documents import Document
 from scripts.rebuild_index import build_documents, split_documents
 
 

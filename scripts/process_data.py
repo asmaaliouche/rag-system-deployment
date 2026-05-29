@@ -28,10 +28,29 @@ def process_events(raw_data_path, processed_data_path):
         
         # Combine short and long descriptions if necessary
         full_description = description if len(description) > len(long_description) else long_description
+        if not full_description:
+            full_description = "Aucune description disponible."
+
+        # Extract and format timings
+        timings = event.get("timings", [])
+        formatted_timings = []
+        for t in timings:
+            start = t.get("start", "")
+            end = t.get("end", "")
+            if start:
+                # Basic formatting for ISO strings: 2023-10-27T19:00:00.000Z -> 2023-10-27 19:00
+                start_fmt = start.replace("T", " ")[:16]
+                if end:
+                    end_fmt = end.replace("T", " ")[:16]
+                    formatted_timings.append(f"du {start_fmt} au {end_fmt}")
+                else:
+                    formatted_timings.append(f"le {start_fmt}")
+        
+        timing_str = "; ".join(formatted_timings) if formatted_timings else "Dates non précisées"
         
         # Format text for indexing
         # Create a context-rich string
-        content = f"Event: {title}\nLocation: {location_name}, {address}, {city}\nDescription: {full_description}"
+        content = f"Event: {title}\nLocation: {location_name}, {address}, {city}\nDates: {timing_str}\nDescription: {full_description}"
         
         processed_list.append({
             "uid": event.get("uid"),

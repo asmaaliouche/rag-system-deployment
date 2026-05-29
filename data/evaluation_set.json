@@ -1,0 +1,14 @@
+[
+  {
+    "question": "Où se déroule le concert de jazz ?",
+    "ground_truth": "Le concert de jazz se déroule au Parc Floral, Route de la Pyramide à Paris."
+  },
+  {
+    "question": "Quels événements sont prévus au Palais de Tokyo ?",
+    "ground_truth": "Une exposition internationale de photographie est prévue au Palais de Tokyo."
+  },
+  {
+    "question": "Y a-t-il des activités en plein air prévues ce week-end ?",
+    "ground_truth": "Oui, il y a plusieurs activités en plein air, dont un concert au Parc Floral."
+  }
+]

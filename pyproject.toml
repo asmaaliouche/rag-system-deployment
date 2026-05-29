@@ -1,12 +1,13 @@
 [project]
 name = "puls-events-rag-poc"
 version = "0.1.0"
+package-mode = false
 description = "POC for a cultural events RAG chatbot."
 authors = [
     {name = "Asma Aliouche"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "faiss-cpu (>=1.13.2,<2.0.0)",
     "langchain (>=1.2.12,<2.0.0)",
@@ -18,12 +19,16 @@ dependencies = [
     "requests (>=2.32.5,<3.0.0)",
     "fastapi (>=0.135.1,<0.136.0)",
     "uvicorn (>=0.41.0,<0.42.0)",
-    "python-dotenv (>=1.2.2,<2.0.0)"
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "hf-xet (>=1.5.0,<2.0.0)",
+    "langchain-huggingface (>=1.2.2,<2.0.0)",
+    "ragas (>=0.4.3,<0.5.0)"
 ]
 
 [dependency-groups]
 dev = [
-    "pytest (>=9.0.2,<10.0.0)"
+    "pytest (>=9.0.2,<10.0.0)",
+    "ipykernel (>=7.2.0,<8.0.0)"
 ]
 
 

@@ -1,8 +1,11 @@
 import os
 import json
 import requests
-# pyrefly: ignore [missing-import]
+import urllib3
 from dotenv import load_dotenv
+
+# Suppress InsecureRequestWarning for local Mac SSL issues
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def fetch_openagenda_events(agenda_uid, api_key, city="Paris"):
     """
@@ -16,7 +19,8 @@ def fetch_openagenda_events(agenda_uid, api_key, city="Paris"):
     }
     
     print(f"Fetching events from agenda {agenda_uid} for city {city}...")
-    response = requests.get(url, params=params)
+    # Added verify=False to bypass local SSL certificate issues on Mac
+    response = requests.get(url, params=params, verify=False)
     
     if response.status_code == 200:
         return response.json()
