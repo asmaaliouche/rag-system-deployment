@@ -12,43 +12,47 @@ Tests cover:
 # pyrefly: ignore [missing-import]
 import pytest
 import pandas as pd
+
 # pyrefly: ignore [missing-import]
 from langchain_core.documents import Document
 from scripts.rebuild_index import build_documents, split_documents
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_df():
     """Returns a minimal DataFrame that mimics the processed events CSV."""
-    return pd.DataFrame([
-        {
-            "uid": "1",
-            "title": "Jazz Concert",
-            "city": "Paris",
-            "content": (
-                "Event: Jazz Concert\n"
-                "Location: Parc Floral, Route de la Pyramide, Paris\n"
-                "Description: A great outdoor jazz concert with live music."
-            ),
-            "url": "https://example.com/jazz",
-        },
-        {
-            "uid": "2",
-            "title": "Photography Exhibition",
-            "city": "Paris",
-            "content": (
-                "Event: Photography Exhibition\n"
-                "Location: Palais de Tokyo, Avenue du Président Wilson, Paris\n"
-                "Description: An international photography exhibition featuring emerging artists."
-            ),
-            "url": "https://example.com/photo",
-        },
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "uid": "1",
+                "title": "Jazz Concert",
+                "city": "Paris",
+                "content": (
+                    "Event: Jazz Concert\n"
+                    "Location: Parc Floral, Route de la Pyramide, Paris\n"
+                    "Description: A great outdoor jazz concert with live music."
+                ),
+                "url": "https://example.com/jazz",
+            },
+            {
+                "uid": "2",
+                "title": "Photography Exhibition",
+                "city": "Paris",
+                "content": (
+                    "Event: Photography Exhibition\n"
+                    "Location: Palais de Tokyo, Avenue du Président Wilson, Paris\n"
+                    "Description: An international photography exhibition featuring emerging artists."
+                ),
+                "url": "https://example.com/photo",
+            },
+        ]
+    )
 
 
 # ── Tests ──────────────────────────────────────────────────────────────────────
+
 
 class TestBuildDocuments:
     """Tests for the build_documents function."""

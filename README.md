@@ -45,6 +45,13 @@ poetry install
 ### 3. Initialize the Vector Index
 Before running the system, you must fetch the data and build the FAISS index:
 ```bash
+# 1. Fetch data from OpenAgenda
+poetry run python scripts/fetch_data.py
+
+# 2. Process data
+poetry run python scripts/process_data.py
+
+# 3. Build the index
 poetry run python scripts/rebuild_index.py
 ```
 
@@ -77,12 +84,13 @@ FastAPI automatically generates documentation. Once the API is running, go to:
 ### How to test the chatbot:
 1. Locate the **`POST /ask`** endpoint.
 2. Click **"Try it out"**.
-3. In the Request Body, replace `"string"` with your question:
+3. In the Request Body, replace `"string"` with a full question:
    ```json
    {
      "question": "Quels sont les concerts de jazz prévus à Paris ?"
    }
    ```
+   *(Note: The RAG system requires full questions rather than single keywords like "concert" to provide the best, most contextualized answers).*
 4. Click **"Execute"** to see the AI's response.
 
 ---
@@ -109,7 +117,8 @@ poetry run pytest
 
 - `api/`: FastAPI routes and logic.
 - `data/`: Local storage for datasets and FAISS index.
-- `scripts/`: Core logic (Data fetching, Indexing, RAG system, Evaluation).
+- `docs/`: Technical documentation and presentation slides for the POC.
+- `scripts/`: Core logic (Data fetching, Processing, Indexing, RAG system, Evaluation).
 - `tests/`: Unit tests.
 - `Dockerfile`: Container configuration.
 - `pyproject.toml`: Poetry dependencies.

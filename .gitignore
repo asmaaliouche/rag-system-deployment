@@ -30,3 +30,6 @@ data/faiss_index/
 
 # Poetry
 .poetry/
+
+# Ignore __init__.py files
+__init__.py
