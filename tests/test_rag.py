@@ -7,12 +7,12 @@ Uses mocks to avoid making actual API calls to Mistral or requiring a built FAIS
 
 import pytest
 from unittest.mock import patch, MagicMock
-from scripts.rag_system import RAGSystem
+from src.rag_system import RAGSystem
 
 
-@patch("scripts.rag_system.ChatMistralAI")
-@patch("scripts.rag_system.FAISS.load_local")
-@patch("scripts.rag_system.MistralAIEmbeddings")
+@patch("src.rag_system.ChatMistralAI")
+@patch("src.rag_system.FAISS.load_local")
+@patch("src.rag_system.MistralAIEmbeddings")
 @patch("os.path.exists", return_value=True)
 def test_rag_ask_method(mock_exists, mock_embeddings, mock_faiss, mock_llm):
     """
@@ -25,9 +25,7 @@ def test_rag_ask_method(mock_exists, mock_embeddings, mock_faiss, mock_llm):
         "answer": "Il y a un concert de jazz ce soir au Parc Floral."
     }
 
-    with patch(
-        "scripts.rag_system.create_retrieval_chain", return_value=mock_rag_chain
-    ):
+    with patch("src.rag_system.create_retrieval_chain", return_value=mock_rag_chain):
         rag = RAGSystem(mistral_api_key="fake-key")
         answer = rag.ask("Quels sont les événements de jazz ?")
 

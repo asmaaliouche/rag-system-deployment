@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 os.environ["HF_HUB_DISABLE_XET"] = "1"
 
 # --- ZSCALER / PROXY WORKAROUNDS ---
-import httpx
 
 
 def patch_httpx_ssl(client_class):

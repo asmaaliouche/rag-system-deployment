@@ -46,13 +46,13 @@ poetry install
 Before running the system, you must fetch the data and build the FAISS index:
 ```bash
 # 1. Fetch data from OpenAgenda
-poetry run python scripts/fetch_data.py
+poetry run python src/fetch_data.py
 
 # 2. Process data
-poetry run python scripts/process_data.py
+poetry run python src/process_data.py
 
 # 3. Build the index
-poetry run python scripts/rebuild_index.py
+poetry run python src/rebuild_index.py
 ```
 
 ---
@@ -99,7 +99,7 @@ FastAPI automatically generates documentation. Once the API is running, go to:
 
 To measure the quality of the RAG system (Faithfulness, Relevancy, etc.) using **Ragas**:
 ```bash
-poetry run python scripts/evaluate_rag.py
+poetry run python src/evaluate_rag.py
 ```
 Results will be saved in `data/evaluation_results.csv`.
 
@@ -118,7 +118,7 @@ poetry run pytest
 - `api/`: FastAPI routes and logic.
 - `data/`: Local storage for datasets and FAISS index.
 - `docs/`: Technical documentation and presentation slides for the POC.
-- `scripts/`: Core logic (Data fetching, Processing, Indexing, RAG system, Evaluation).
+- `src/`: Core logic (Data fetching, Processing, Indexing, RAG system, Evaluation).
 - `tests/`: Unit tests.
 - `Dockerfile`: Container configuration.
 - `pyproject.toml`: Poetry dependencies.

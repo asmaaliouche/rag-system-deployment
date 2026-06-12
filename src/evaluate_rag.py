@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """
 evaluate_rag.py
 ---------------
@@ -17,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Add project root to path so we can import 'scripts'
+# Add project root to path so we can import 'src'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from datasets import Dataset
@@ -32,7 +33,7 @@ from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
 
-from scripts.rag_system import RAGSystem
+from src.rag_system import RAGSystem
 from dotenv import load_dotenv
 
 load_dotenv()

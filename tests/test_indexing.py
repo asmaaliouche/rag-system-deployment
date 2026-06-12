@@ -1,7 +1,7 @@
 """
 test_indexing.py
 ----------------
-Unit tests for the FAISS index building pipeline (scripts/rebuild_index.py).
+Unit tests for the FAISS index building pipeline (src/rebuild_index.py).
 
 Tests cover:
     - Document creation from a DataFrame row
@@ -15,7 +15,7 @@ import pandas as pd
 
 # pyrefly: ignore [missing-import]
 from langchain_core.documents import Document
-from scripts.rebuild_index import build_documents, split_documents
+from src.rebuild_index import build_documents, split_documents
 
 # ── Fixtures ───────────────────────────────────────────────────────────────────
 

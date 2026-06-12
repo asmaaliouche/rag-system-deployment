@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from scripts.rag_system import RAGSystem
+from src.rag_system import RAGSystem
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -59,7 +59,7 @@ async def rebuild_index():
     try:
         # Import and run the rebuild logic
         # We run it as a subprocess to keep the API responsive or just import the functions
-        from scripts.rebuild_index import (
+        from src.rebuild_index import (
             load_events,
             build_documents,
             split_documents,

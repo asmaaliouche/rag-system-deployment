@@ -3,7 +3,7 @@ import json
 
 # pyrefly: ignore [missing-import]
 import pandas as pd
-from scripts.process_data import process_events
+from src.process_data import process_events
 
 
 def test_process_events(tmp_path):

@@ -63,7 +63,7 @@ class RAGSystem:
 
         if not os.path.exists(index_path):
             raise FileNotFoundError(
-                f"FAISS index not found at {index_path}. Please run scripts/rebuild_index.py first."
+                f"FAISS index not found at {index_path}. Please run src/rebuild_index.py first."
             )
 
         self.vector_store = FAISS.load_local(
