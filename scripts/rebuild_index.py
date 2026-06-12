@@ -2,92 +2,68 @@
 rebuild_index.py
 ----------------
 Builds a FAISS vector index from the processed events CSV.
-
-Pipeline:
-    1. Load processed events from data/processed/events_structured.csv
-    2. Split each event's 'content' field into overlapping text chunks
-    3. Embed each chunk using a HuggingFace sentence-transformer model (local, no API key needed)
-    4. Store the resulting vectors in a FAISS index
-    5. Persist the index to disk at data/faiss_index/
-
-Usage:
-    python scripts/rebuild_index.py
+Uses Mistral AI cloud embeddings to avoid local model download issues.
 """
 
 import os
+import sys
 import pandas as pd
 from dotenv import load_dotenv
-from huggingface_hub import login
 
-# Disable XetHub to avoid 403 errors and suppress SSL warnings
+# Disable XetHub and other HF-related stuff
 os.environ["HF_HUB_DISABLE_XET"] = "1"
+
+# --- ZSCALER / PROXY WORKAROUNDS ---
 import httpx
-original_init = httpx.Client.__init__
-def patched_init(self, *args, **kwargs):
-    kwargs['verify'] = False
-    original_init(self, *args, **kwargs)
-httpx.Client.__init__ = patched_init
-# Also suppress warnings
-import urllib3
+
+def patch_httpx_ssl(client_class):
+    """
+    Surgically patches httpx classes to ignore SSL verification.
+    This is necessary to bypass Zscaler/Corporate VPN inspection.
+    """
+    original_init = client_class.__init__
+    def patched_init(self, *args, **kwargs):
+        kwargs['verify'] = False
+        original_init(self, *args, **kwargs)
+    client_class.__init__ = patched_init
+
+# Apply the patch to both Client and AsyncClient independently
+patch_httpx_ssl(httpx.Client)
+patch_httpx_ssl(httpx.AsyncClient)
+
+# Suppress warnings
+import urllib3 # noqa: E402
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-import warnings
-warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+import warnings # noqa: E402
+warnings.filterwarnings("ignore", category=UserWarning)
 
 load_dotenv()
-if "HF_TOKEN" in os.environ:
-    login(token=os.environ["HF_TOKEN"])
 
-# pyrefly: ignore [missing-import]
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-# pyrefly: ignore [missing-import]
-from langchain_community.embeddings import HuggingFaceEmbeddings
-# pyrefly: ignore [missing-import]
-from langchain_community.vectorstores import FAISS
-# pyrefly: ignore [missing-import]
-from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter # noqa: E402
+from langchain_mistralai import MistralAIEmbeddings # noqa: E402
+from langchain_community.vectorstores import FAISS # noqa: E402
+from langchain_core.documents import Document # noqa: E402
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
 PROCESSED_DATA_PATH = "data/processed/events_structured.csv"
 FAISS_INDEX_PATH = "data/faiss_index"
+EMBEDDING_MODEL_NAME = "mistral-embed"
 
-# Model used to generate embeddings (runs locally, no API key required)
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-
-# Chunk settings: each text is split into chunks of ~500 characters,
-# with a 50-character overlap to preserve context across chunk boundaries.
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
-
 
 # ── Functions ──────────────────────────────────────────────────────────────────
 
 def load_events(csv_path: str) -> pd.DataFrame:
-    """
-    Loads the processed events CSV file into a DataFrame.
-    Drops rows where the 'content' column is empty, as they cannot be vectorized.
-    """
     if not os.path.exists(csv_path):
-        raise FileNotFoundError(
-            f"Processed data not found at '{csv_path}'. "
-            "Please run scripts/fetch_data.py and scripts/process_data.py first."
-        )
+        raise FileNotFoundError(f"Data not found: {csv_path}")
     df = pd.read_csv(csv_path)
-    initial_count = len(df)
     df.dropna(subset=["content"], inplace=True)
-    dropped = initial_count - len(df)
-    if dropped > 0:
-        print(f"  [Warning] Dropped {dropped} rows with missing 'content' field.")
-    print(f"  Loaded {len(df)} events from '{csv_path}'.")
+    print(f"  Loaded {len(df)} events.")
     return df
 
-
 def build_documents(df: pd.DataFrame) -> list[Document]:
-    """
-    Converts each row of the DataFrame into a LangChain Document object.
-    Metadata (uid, title, city, url) is stored alongside the text so that
-    search results can be traced back to their source event.
-    """
     docs = []
     for _, row in df.iterrows():
         doc = Document(
@@ -100,58 +76,45 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
             },
         )
         docs.append(doc)
-    print(f"  Created {len(docs)} LangChain Document objects.")
+    print(f"  Created {len(docs)} documents.")
     return docs
 
-
 def split_documents(docs: list[Document]) -> list[Document]:
-    """
-    Splits each document into smaller chunks using a recursive character splitter.
-    This ensures that large descriptions don't exceed the embedding model's context window
-    and that each chunk remains semantically meaningful.
-    """
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
-        separators=["\n\n", "\n", ".", " ", ""],  # Try to split at natural boundaries
-    )
+    splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     chunks = splitter.split_documents(docs)
-    print(f"  Split into {len(chunks)} chunks (chunk_size={CHUNK_SIZE}, overlap={CHUNK_OVERLAP}).")
+    print(f"  Split into {len(chunks)} chunks.")
     return chunks
 
-
 def build_faiss_index(chunks: list[Document], index_path: str) -> None:
-    """
-    Embeds each chunk and stores the resulting vectors in a FAISS index.
-    The index is then saved to disk so it can be loaded by the API without
-    re-running the full embedding pipeline every time.
-    """
-    print(f"  Loading embedding model: '{EMBEDDING_MODEL_NAME}' ...")
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    print(f"  [DEBUG] Starting indexing with Mistral model: {EMBEDDING_MODEL_NAME}")
+    api_key = os.getenv("MISTRAL_API_KEY")
+    if not api_key:
+        raise ValueError("MISTRAL_API_KEY not found.")
+    
+    # Initialize embeddings
+    embeddings = MistralAIEmbeddings(mistral_api_key=api_key, model=EMBEDDING_MODEL_NAME)
 
-    print("  Building FAISS index (this may take a moment)...")
-    vector_store = FAISS.from_documents(chunks, embeddings)
-
-    os.makedirs(index_path, exist_ok=True)
-    vector_store.save_local(index_path)
-    print(f"  FAISS index saved to '{index_path}'.")
-
+    print("  [DEBUG] Sending chunks to Mistral API (SSL check disabled)...")
+    try:
+        vector_store = FAISS.from_documents(chunks, embeddings)
+        os.makedirs(index_path, exist_ok=True)
+        vector_store.save_local(index_path)
+        print(f"  ✅ FAISS index saved to '{index_path}'.")
+    except Exception as e:
+        print(f"  ❌ Error during Mistral API call: {e}")
+        sys.exit(1)
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Step 1/4 — Loading processed events...")
-    df = load_events(PROCESSED_DATA_PATH)
-
-    print("Step 2/4 — Building LangChain documents...")
-    documents = build_documents(df)
-
-    print("Step 3/4 — Splitting documents into chunks...")
-    chunks = split_documents(documents)
-
-    print("Step 4/4 — Embedding chunks and building FAISS index...")
-    build_faiss_index(chunks, FAISS_INDEX_PATH)
-
+    print("RUNNING REBUILD INDEX (FIXED PATCH)")
     print("=" * 60)
-    print("✅ Index successfully built and saved.")
+    
+    df = load_events(PROCESSED_DATA_PATH)
+    documents = build_documents(df)
+    chunks = split_documents(documents)
+    build_faiss_index(chunks, FAISS_INDEX_PATH)
+    
+    print("=" * 60)
+    print("✅ Done.")

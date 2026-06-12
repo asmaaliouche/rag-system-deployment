@@ -1,7 +1,6 @@
 import os
 import json
 # pyrefly: ignore [missing-import]
-import pytest
 import pandas as pd
 from scripts.process_data import process_events
 

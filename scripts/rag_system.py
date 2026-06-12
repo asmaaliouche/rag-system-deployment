@@ -2,39 +2,44 @@
 rag_system.py
 -------------
 Defines the RAGSystem class that integrates FAISS for retrieval and Mistral for generation.
-
-Pipeline:
-    1. Load local FAISS index.
-    2. Retrieve top-k events based on the user's question.
-    3. Pass the events context to the Mistral LLM to generate a personalized answer.
 """
 
 import os
 from dotenv import load_dotenv
 
-# Disable XetHub to avoid 403 errors and suppress SSL warnings for local environment
+# Disable XetHub
 os.environ["HF_HUB_DISABLE_XET"] = "1"
+
+# --- ZSCALER / PROXY WORKAROUNDS ---
 import httpx
-original_init = httpx.Client.__init__
-def patched_init(self, *args, **kwargs):
-    kwargs['verify'] = False
-    original_init(self, *args, **kwargs)
-httpx.Client.__init__ = patched_init
-import urllib3
+
+def patch_httpx_ssl(client_class):
+    """
+    Surgically patches httpx classes to ignore SSL verification.
+    """
+    original_init = client_class.__init__
+    def patched_init(self, *args, **kwargs):
+        kwargs['verify'] = False
+        original_init(self, *args, **kwargs)
+    client_class.__init__ = patched_init
+
+patch_httpx_ssl(httpx.Client)
+patch_httpx_ssl(httpx.AsyncClient)
+
+import urllib3 # noqa: E402
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-from langchain_mistralai import ChatMistralAI
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings # noqa: E402
+from langchain_community.vectorstores import FAISS # noqa: E402
 # Using langchain_classic as per environment structure
-from langchain_classic.chains import create_retrieval_chain
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_classic.chains import create_retrieval_chain # noqa: E402
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain # noqa: E402
+from langchain_core.prompts import ChatPromptTemplate # noqa: E402
 
 load_dotenv()
 
 FAISS_INDEX_PATH = "data/faiss_index"
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "mistral-embed"
 
 class RAGSystem:
     def __init__(self, index_path=FAISS_INDEX_PATH, mistral_api_key=None):
@@ -42,22 +47,23 @@ class RAGSystem:
         if not api_key or api_key == "your_mistral_api_key_here":
             raise ValueError("Valid MISTRAL_API_KEY is not set in .env")
         
-        # 1. Load local embeddings and FAISS index
-        self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+        # 1. Initialize Mistral embeddings (Cloud-based, no local model download)
+        self.embeddings = MistralAIEmbeddings(mistral_api_key=api_key, model=EMBEDDING_MODEL_NAME)
+        
         if not os.path.exists(index_path):
             raise FileNotFoundError(f"FAISS index not found at {index_path}. Please run scripts/rebuild_index.py first.")
             
         self.vector_store = FAISS.load_local(
             index_path, 
             self.embeddings,
-            allow_dangerous_deserialization=True # Required by FAISS to load local pickles securely
+            allow_dangerous_deserialization=True 
         )
         self.retriever = self.vector_store.as_retriever(search_kwargs={"k": 5})
         
         # 2. Initialize Mistral LLM
         self.llm = ChatMistralAI(
             mistral_api_key=api_key,
-            model="open-mistral-nemo", # Lightweight model for POC
+            model="open-mistral-nemo",
             temperature=0.2
         )
         

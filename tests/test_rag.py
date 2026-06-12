@@ -11,7 +11,7 @@ from scripts.rag_system import RAGSystem
 
 @patch("scripts.rag_system.ChatMistralAI")
 @patch("scripts.rag_system.FAISS.load_local")
-@patch("scripts.rag_system.HuggingFaceEmbeddings")
+@patch("scripts.rag_system.MistralAIEmbeddings")
 @patch("os.path.exists", return_value=True)
 def test_rag_ask_method(mock_exists, mock_embeddings, mock_faiss, mock_llm):
     """

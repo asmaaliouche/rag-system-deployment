@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from scripts.rag_system import RAGSystem
-import os
 from dotenv import load_dotenv
 
 load_dotenv()

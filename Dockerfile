@@ -28,8 +28,12 @@ RUN poetry config virtualenvs.create false \
 # Copy the rest of the application
 COPY . /app/
 
+# Ensure data directories exist
+RUN mkdir -p data/raw data/processed data/faiss_index
+
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
+# We'll use a wrapper script to check for index or just run the app
+# Note: Rebuilding index requires a MISTRAL_API_KEY, so we can't do it at build time easily.
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
