@@ -1,12 +1,20 @@
 # Puls-Events RAG POC 🚀
 
-This project is a Proof of Concept (POC) for an intelligent cultural assistant. It uses **RAG (Retrieval-Augmented Generation)** to recommend events from the Open Agenda platform based on semantic search.
+This project is a Proof of Concept (POC) for an intelligent cultural assistant. It uses **RAG (Retrieval-Augmented Generation)** to recommend events from the Open Agenda platform based on semantic search and natural language synthesis.
 
 Built for the **OpenClassrooms** AI Engineer path.
 
 ---
 
-## 🛠 Tech Stack
+## 🖼️ System Architecture
+
+Below is the modular data ingestion pipeline and real-time semantic inference architecture used in this system:
+
+![Puls-Events RAG Architecture](docs/architecture.svg)
+
+---
+
+## 🛠️ Tech Stack
 
 - **Language:** Python 3.10
 - **Framework:** FastAPI (REST API)
@@ -35,7 +43,7 @@ git clone <https://github.com/asmaaliouche/rag-system-deployment.git>
 cd puls-events-rag-poc
 cp .env.template .env
 ```
-*Edit `.env` and add your `MISTRAL_API_KEY`.*
+*Edit `.env` and add your `MISTRAL_API_KEY` and optional `OPENAGENDA_API_KEY`.*
 
 ### 2. Install Dependencies
 ```bash
@@ -43,21 +51,21 @@ poetry install
 ```
 
 ### 3. Initialize the Vector Index
-Before running the system, you must fetch the data and build the FAISS index:
+Before running the system, you must fetch the data, process it, and build the FAISS index:
 ```bash
-# 1. Fetch data from OpenAgenda
+# 1. Fetch data from OpenAgenda API
 poetry run python src/fetch_data.py
 
-# 2. Process data
+# 2. Clean and structure the raw events
 poetry run python src/process_data.py
 
-# 3. Build the index
+# 3. Build the FAISS vector index
 poetry run python src/rebuild_index.py
 ```
 
 ---
 
-## 🖥 Usage
+## 🖥️ Usage
 
 ### Running Locally
 ```bash
@@ -78,7 +86,7 @@ docker run -p 8000:8000 --env-file .env puls-events-rag
 
 ## 📡 API Documentation (Swagger)
 
-FastAPI automatically generates documentation. Once the API is running, go to:
+FastAPI automatically generates interactive documentation. Once the API is running, visit:
 👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
 
 ### How to test the chatbot:
@@ -90,35 +98,55 @@ FastAPI automatically generates documentation. Once the API is running, go to:
      "question": "Quels sont les concerts de jazz prévus à Paris ?"
    }
    ```
-   *(Note: The RAG system requires full questions rather than single keywords like "concert" to provide the best, most contextualized answers).*
 4. Click **"Execute"** to see the AI's response.
 
 ---
 
-## 📊 Evaluation
+## 📊 Evaluation & Testing
 
-To measure the quality of the RAG system (Faithfulness, Relevancy, etc.) using **Ragas**:
+### Ragas Automated Evaluation
+To measure the semantic quality of the RAG system (Faithfulness, Relevancy, Context Precision, and Recall) against our annotated golden dataset (`data/evaluation_set.json`):
 ```bash
 poetry run python src/evaluate_rag.py
 ```
 Results will be saved in `data/evaluation_results.csv`.
 
----
-
-## 🧪 Testing
-Run unit tests with:
+### Running Unit Tests
+Execute the local unit test suite (covering processing and indexing logic) with:
 ```bash
 poetry run pytest
 ```
 
+### Running Functional API Tests
+To run live functional tests against your running FastAPI server or Docker container:
+```bash
+# Ensure your API is running first (http://localhost:8000)
+poetry run python tests/api_test.py
+```
+
 ---
 
-## 📂 Project Structure
+## 📂 Project Directory Structure
 
-- `api/`: FastAPI routes and logic.
-- `data/`: Local storage for datasets and FAISS index.
-- `docs/`: Technical documentation and presentation slides for the POC.
-- `src/`: Core logic (Data fetching, Processing, Indexing, RAG system, Evaluation).
-- `tests/`: Unit tests.
+- `api/`: FastAPI web server.
+  - `main.py`: Routes (`/ask`, `/rebuild`) and orchestrations.
+- `data/`: Local database storage.
+  - `raw/`: Raw event JSON downloaded from OpenAgenda.
+  - `processed/`: Formatted event CSV files ready for indexing.
+  - `faiss_index/`: Local binary FAISS vector files.
+  - `evaluation_set.json`: Annotated human-curated reference test set.
+- `docs/`: Technical reports and system diagrams.
+  - `TECHNICAL_REPORT.md`: English business and technical validation report.
+  - `architecture.svg`: Vector diagram of the RAG system design.
+- `src/`: Core Python module logic.
+  - `fetch_data.py`: Ingestion logic from OpenAgenda API.
+  - `process_data.py`: Data cleaning, formatting, and filtering.
+  - `rebuild_index.py`: Document splitter and FAISS builder.
+  - `rag_system.py`: LangChain RAG pipeline configuration.
+  - `evaluate_rag.py`: Ragas test execution and scoring script.
+- `tests/`: Testing directory.
+  - `test_data.py`, `test_indexing.py`, `test_rag.py`: Unit tests.
+  - `api_test.py`: Standalone live API endpoint validator.
 - `Dockerfile`: Container configuration.
-- `pyproject.toml`: Poetry dependencies.
+- `pyproject.toml` / `poetry.lock`: Poetry project configuration and dependency graph.
+- `README.md`: Project manual (this file).
