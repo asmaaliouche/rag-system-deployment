@@ -1,14 +1,34 @@
 [
   {
-    "question": "Où se déroule le concert de jazz ?",
-    "ground_truth": "Le concert de jazz se déroule au Parc Floral, Route de la Pyramide à Paris."
+    "question": "Où se déroule l'exposition 'Si on cherchait la petite bête' ?",
+    "ground_truth": "L'exposition 'Si on cherchait la petite bête' se déroule au Parc du Peuple de l'herbe, situé au 718 avenue du docteur Marcel Touboul, 78955 Carrières-sous-Poissy."
   },
   {
-    "question": "Quels événements sont prévus au Palais de Tokyo ?",
-    "ground_truth": "Une exposition internationale de photographie est prévue au Palais de Tokyo."
+    "question": "Quelles sont les dates de l'exposition photographique sur les châteaux et villas en Île-de-France ?",
+    "ground_truth": "L'exposition photographique 'Châteaux, villas et folies. Villégiature en Île-de-France' se tient du 30 juin au 30 août 2026 au Domaine national de Saint-Cloud."
   },
   {
-    "question": "Y a-t-il des activités en plein air prévues ce week-end ?",
-    "ground_truth": "Oui, il y a plusieurs activités en plein air, dont un concert au Parc Floral."
+    "question": "Où peut-on faire du dessin et de la poésie au jardin ?",
+    "ground_truth": "L'activité 'Dessin & poésie au jardin' a lieu au Potager du clos Feuquières, 32 rue du clos Feuquières, 75015 Paris."
+  },
+  {
+    "question": "Où se trouve le jardin de l'église Saint-Serge ?",
+    "ground_truth": "Le jardin de l'église Saint-Serge est situé au 93 rue de Crimée, 75019 Paris."
+  },
+  {
+    "question": "Y a-t-il des ateliers de jardinage pour les urbains ?",
+    "ground_truth": "Oui, l'atelier 'Potager de balcon' permet aux urbains d'apprendre à cultiver des légumes, des herbes aromatiques et des fleurs comestibles en ville. Il a lieu du 28 juin au 29 juillet 2026."
+  },
+  {
+    "question": "Qu'est-ce qu'on peut voir au Domaine national de Saint-Cloud cet été ?",
+    "ground_truth": "Au Domaine national de Saint-Cloud, on peut voir l'exposition photographique 'Châteaux, villas et folies. Villégiature en Île-de-France', une exposition en plein air dans le cadre du jardin de Valois, du 30 juin au 30 août 2026."
+  },
+  {
+    "question": "Y a-t-il des activités en plein air dans des jardins en Île-de-France ?",
+    "ground_truth": "Oui, plusieurs activités en plein air sont proposées dans des jardins en Île-de-France, notamment des visites de jardins, des ateliers de jardinage, des activités de dessin et poésie, et des expositions photographiques en extérieur."
+  },
+  {
+    "question": "Quels événements sont organisés dans le cadre de 'Jardins ouverts 2026' ?",
+    "ground_truth": "Dans le cadre de 'Jardins ouverts 2026', plusieurs événements sont proposés : l'exposition 'Si on cherchait la petite bête' au Parc du Peuple de l'herbe, l'exposition photographique 'Châteaux, villas et folies' au Domaine national de Saint-Cloud, 'Dessin & poésie au jardin' au Potager du clos Feuquières, et la visite du jardin de l'église Saint-Serge."
   }
 ]
